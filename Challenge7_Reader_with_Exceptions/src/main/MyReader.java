@@ -18,10 +18,11 @@ public class MyReader extends FileReader {
 	public MyReader(File file) throws IOException {
 		super(file);
 		bufferedReader = new BufferedReader(this);
-		bufferedReader.mark(8192);
+		
 	}
 
 	public int countLines() throws MyNullReaderException, IOException {
+		
 		if (bufferedReader == null) {
 			throw new MyNullReaderException();
 		} else {
@@ -30,13 +31,14 @@ public class MyReader extends FileReader {
 			while ((lineRead = bufferedReader.readLine()) != null) {
 				count++;
 			}
-			bufferedReader.reset();
+			
 			return count;
 		}
 	}
 
 	public String readLineAt(int i) throws MyNullReaderException, NullLineException, IOException {
 
+		
 		if (bufferedReader == null) {
 			throw new MyNullReaderException();
 		} else {
@@ -44,7 +46,7 @@ public class MyReader extends FileReader {
 				bufferedReader.readLine();
 			}
 			String line = bufferedReader.readLine();
-			bufferedReader.reset();
+			
 			if (line.equals("")) {
 				throw new NullLineException();
 			} else {
@@ -55,16 +57,17 @@ public class MyReader extends FileReader {
 	}
 
 	public ArrayList<String> readWords() throws MyNullReaderException, IOException {
+		
 		if (bufferedReader == null) {
 			throw new MyNullReaderException();
 		} else {
 			ArrayList<String> wordList = new ArrayList<>();
 			StringBuilder stringBuilder = new StringBuilder();
 
-			for (int i = 1; i <= this.countLines(); i++) {
+			while(bufferedReader.ready()) {
 				String line;
 				try {
-					line = readLineAt(i);
+					line = bufferedReader.readLine();
 					for (int j = 0; j < line.length(); j++) {
 						if (line.charAt(j) != ' ') {
 							stringBuilder.append(line.charAt(j));
@@ -85,7 +88,7 @@ public class MyReader extends FileReader {
 				}
 
 			}
-			bufferedReader.reset();
+			
 			return wordList;
 		}
 	}
