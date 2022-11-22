@@ -28,6 +28,7 @@ public class CourseController {
 	@GetMapping("/getAll")
 	public ResponseEntity<List<ListCourseDto>> getAll() {
 		return courseService.getAll();
+		
 	}
 
 	@GetMapping("/getById")
