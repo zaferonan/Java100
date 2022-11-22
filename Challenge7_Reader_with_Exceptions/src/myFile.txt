@@ -1,0 +1,9 @@
+Bir reader extension'ı yazılması gerekiyor.
+dosyadaki büyün kelimeleri okuma yapabilmesi gerekiyor.
+dosyadan istediğim satır numarasını okuyabilmesi gerekiyor.
+
+String'lerin Split fonksiyonu kullanılmayacak.
+
+ArrayList<String> kelimeler= myReader.readWords("C:/dosya.txt");
+
+String satir= myReader.readLineAt(4);
