@@ -16,6 +16,6 @@ public class ListCourseDto {
 	private long courseId;
 	private String courseSubjectName;
 	private String courseTeacherName;
-	private List<CourseStudent> courseStudents;
+	
 	
 }

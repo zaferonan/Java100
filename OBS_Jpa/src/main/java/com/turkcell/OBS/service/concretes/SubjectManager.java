@@ -107,8 +107,7 @@ public class SubjectManager implements SubjectService {
 		for (int i = 0; i < subject.getCourses().size(); i++) {
 			ListCourseDto listCourseDto = new ListCourseDto(subject.getCourses().get(i).getCourseId(),
 					subject.getCourses().get(i).getSubject().getSubjectName(),
-					subject.getCourses().get(i).getTeacher().getTeacherName(),
-					subject.getCourses().get(i).getCourseStudents());
+					subject.getCourses().get(i).getTeacher().getTeacherName());
 			listCourseDtos.add(listCourseDto);
 		}
 		subjectDto.setCourses(listCourseDtos);
@@ -124,11 +123,9 @@ public class SubjectManager implements SubjectService {
 		for (int i = 0; i < subject.getCourses().size(); i++) {
 			ListCourseDto listCourseDto = new ListCourseDto(subject.getCourses().get(i).getCourseId(),
 					subject.getCourses().get(i).getSubject().getSubjectName(),
-					subject.getCourses().get(i).getTeacher().getTeacherName(),
-					subject.getCourses().get(i).getCourseStudents());
+					subject.getCourses().get(i).getTeacher().getTeacherName());
 			listCourseDtos.add(listCourseDto);
-		}
-		listSubjectDto.setCourses(listCourseDtos);
+		}		
 		return listSubjectDto;
 	}
 

@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Example;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -123,7 +122,7 @@ public class CourseStudentManager implements CourseStudentService {
 			throw new BusinessException("There is no course with this id : " + courseId);
 		}
 
-		List<CourseStudent> courseStudents = iCourseStudentRepository.getByCourse(courseService.getByIdAsCourse(courseId));
+		List<CourseStudent> courseStudents = iCourseStudentRepository.findAll().stream().filter(c->c.getCourse().getCourseId()==courseId).toList();
 		if (courseStudents.isEmpty()) {
 			throw new BusinessException("There is no courseStudents with this course id : " + courseId);
 		}
@@ -147,7 +146,7 @@ public class CourseStudentManager implements CourseStudentService {
 		if (!isExistedStudent(studentId)) {
 			throw new BusinessException("There is no student with this id : " + studentId);
 		}
-		List<CourseStudent> courseStudents = iCourseStudentRepository.getByStudent(studentService.getByIdAsStudent(studentId));
+		List<CourseStudent> courseStudents = iCourseStudentRepository.findAll().stream().filter(c->c.getStudent().getStudentId()==studentId).toList();
 		
 		if (courseStudents.isEmpty()) {
 			throw new BusinessException("There is no courseStudent with this student id : " + studentId);

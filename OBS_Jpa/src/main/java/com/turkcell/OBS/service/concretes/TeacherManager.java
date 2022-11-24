@@ -12,6 +12,7 @@ import com.turkcell.OBS.core.exceptions.BusinessException;
 import com.turkcell.OBS.model.Teacher;
 import com.turkcell.OBS.repository.abstracts.ITeacherRepository;
 import com.turkcell.OBS.service.abstracts.TeacherService;
+import com.turkcell.OBS.service.dtos.course.ListCourseDto;
 import com.turkcell.OBS.service.dtos.teacher.ListTeacherDto;
 import com.turkcell.OBS.service.dtos.teacher.TeacherDto;
 import com.turkcell.OBS.service.requests.create.CreateTeacherRequest;
@@ -32,6 +33,8 @@ public class TeacherManager implements TeacherService {
 			listTeacherDto.setTeacherId(teacher.getTeacherId());
 			listTeacherDto.setGicik(teacher.isGicik());
 			listTeacherDto.setTeacherName(teacher.getTeacherName());
+
+					
 
 			listTeacherDtos.add(listTeacherDto);
 		}
@@ -76,6 +79,17 @@ public class TeacherManager implements TeacherService {
 		TeacherDto teacherDto = new TeacherDto();
 		teacherDto.setGicik(teacher.isGicik());
 		teacherDto.setTeacherName(teacher.getTeacherName());
+		
+		List<ListCourseDto> listCourseDtos = new ArrayList<ListCourseDto>();
+
+		for (int i = 0; i < teacher.getCourses().size(); i++) {
+			ListCourseDto listCourseDto = new ListCourseDto(teacher.getCourses().get(i).getCourseId(),
+					teacher.getCourses().get(i).getSubject().getSubjectName(),
+					teacher.getCourses().get(i).getTeacher().getTeacherName());
+			listCourseDtos.add(listCourseDto);
+		}
+		teacherDto.setCourses(listCourseDtos);
+		
 		return ResponseEntity.ok(teacherDto);
 
 	}
@@ -89,7 +103,8 @@ public class TeacherManager implements TeacherService {
 		ListTeacherDto teacherDto = new ListTeacherDto();
 		teacherDto.setTeacherId(teacher.getTeacherId());
 		teacherDto.setGicik(teacher.isGicik());
-		teacherDto.setTeacherName(teacher.getTeacherName());
+		teacherDto.setTeacherName(teacher.getTeacherName());		
+		
 		return ResponseEntity.ok(teacherDto);
 	}
 

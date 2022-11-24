@@ -122,7 +122,7 @@ public class CourseManager implements CourseService {
 			throw new BusinessException("There is no teacher whit this id : " + teacherId + " in the database!");
 		}
 
-		List<Course> courses = iCourseRepository.getByTeacher(teacherId);
+		List<Course> courses = iCourseRepository.findAll().stream().filter(c->c.getTeacher().getTeacherId()==teacherId).toList();
 
 		if (courses.isEmpty()) {
 			throw new BusinessException("There is no course with this teacher id : " + teacherId);
@@ -148,7 +148,7 @@ public class CourseManager implements CourseService {
 			throw new BusinessException("There is no subject whit this id : " + subjectId + " in the database!");
 		}
 
-		List<Course> courses = iCourseRepository.getBySubject(subjectId);
+		List<Course> courses = iCourseRepository.findAll().stream().filter(c->c.getSubject().getSubjectId()==subjectId).toList();
 		if (courses.isEmpty()) {
 			throw new BusinessException("There is no course with this subject id : " + subjectId);
 		}
