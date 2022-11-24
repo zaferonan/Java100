@@ -2,7 +2,7 @@ package com.turkcell.OBS.service.dtos.course;
 
 import java.util.List;
 
-import com.turkcell.OBS.model.CourseStudent;
+import com.turkcell.OBS.service.dtos.courseStudent.ListCourseStudentDto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -16,6 +16,7 @@ public class ListCourseDto {
 	private long courseId;
 	private String courseSubjectName;
 	private String courseTeacherName;
+	private List<ListCourseStudentDto> courseStudents;
 	
 	
 }

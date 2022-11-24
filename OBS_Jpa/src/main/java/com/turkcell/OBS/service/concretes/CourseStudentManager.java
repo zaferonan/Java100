@@ -2,6 +2,7 @@ package com.turkcell.OBS.service.concretes;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -9,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.turkcell.OBS.core.exceptions.BusinessException;
+import com.turkcell.OBS.core.exceptions.mappers.abstracts.ModelMapperService;
 import com.turkcell.OBS.model.CourseStudent;
 import com.turkcell.OBS.repository.abstracts.ICourseStudentRepository;
 import com.turkcell.OBS.service.abstracts.CourseService;
@@ -19,6 +21,8 @@ import com.turkcell.OBS.service.dtos.courseStudent.ListCourseStudentDto;
 import com.turkcell.OBS.service.requests.create.CreateCourseStudentRequest;
 import com.turkcell.OBS.service.requests.update.UpdateCourseStudentRequest;
 
+import net.bytebuddy.asm.Advice.This;
+
 @Service
 public class CourseStudentManager implements CourseStudentService {
 
@@ -28,23 +32,17 @@ public class CourseStudentManager implements CourseStudentService {
 	private CourseService courseService;
 	@Autowired
 	private StudentService studentService;
+	@Autowired
+	private ModelMapperService modelMapperService;
 
 	@Override
 	public ResponseEntity<List<ListCourseStudentDto>> getAll() {
 		List<CourseStudent> courseStudents = iCourseStudentRepository.findAll();
-		List<ListCourseStudentDto> listCourseStudentDtos = new ArrayList<>();
-		for (CourseStudent courseStudent : courseStudents) {
-			ListCourseStudentDto listCourseStudentDto = new ListCourseStudentDto();
-			listCourseStudentDto.setCourseStudentId(courseStudent.getCourseStudentId());
-			listCourseStudentDto.setCourseStudentAbsence(courseStudent.getCourseStudentAbsence());
-			listCourseStudentDto.setCourseStudentNote(courseStudent.getCourseStudentNote());
-			listCourseStudentDto
-					.setCourseStudentCourseSubjectName(courseStudent.getCourse().getSubject().getSubjectName());
-			listCourseStudentDto
-					.setCourseStudentCourseTeacherName(courseStudent.getCourse().getTeacher().getTeacherName());
-			listCourseStudentDto.setCourseStudentStudentName(courseStudent.getStudent().getStudentName());
-			listCourseStudentDtos.add(listCourseStudentDto);
-		}
+
+		List<ListCourseStudentDto> listCourseStudentDtos = courseStudents.stream()
+				.map(courseStudent -> this.modelMapperService.forDto().map(courseStudent, ListCourseStudentDto.class))
+				.collect(Collectors.toList());
+
 		return ResponseEntity.status(HttpStatus.FOUND).body(listCourseStudentDtos);
 	}
 
@@ -62,9 +60,8 @@ public class CourseStudentManager implements CourseStudentService {
 			throw new BusinessException("This CourseStudent is already exists!!");
 		}
 
-		iCourseStudentRepository.save(createCourseStudentRequest.toCourseStudent(
-				courseService.getByIdAsCourse(createCourseStudentRequest.getCourseId()),
-				studentService.getByIdAsStudent(createCourseStudentRequest.getStudentId())));
+		iCourseStudentRepository
+				.save(this.modelMapperService.forRequest().map(createCourseStudentRequest, CourseStudent.class));
 		return ResponseEntity.status(HttpStatus.CREATED).body("CourseStudent is saved in the database.");
 
 	}
@@ -81,9 +78,8 @@ public class CourseStudentManager implements CourseStudentService {
 			throw new BusinessException(
 					"There is no student with this id : " + updateCourseStudentRequest.getStudentId());
 		}
-		iCourseStudentRepository.save(updateCourseStudentRequest.toCourseStudent(
-				courseService.getByIdAsCourse(updateCourseStudentRequest.getCourseId()),
-				studentService.getByIdAsStudent(updateCourseStudentRequest.getStudentId())));
+		iCourseStudentRepository
+				.save(this.modelMapperService.forRequest().map(updateCourseStudentRequest, CourseStudent.class));
 		return ResponseEntity.ok("CourseStudent is updated in the database.");
 
 	}
@@ -104,14 +100,7 @@ public class CourseStudentManager implements CourseStudentService {
 			throw new BusinessException("There is no CourseStudent with this id : " + courseStudentId);
 		}
 		CourseStudent courseStudent = iCourseStudentRepository.getById(courseStudentId);
-		CourseStudentDto courseStudentDto = new CourseStudentDto();
-		courseStudentDto.setCourseStudentAbsence(courseStudent.getCourseStudentAbsence());
-		courseStudentDto.setCourseStudentNote(courseStudent.getCourseStudentNote());
-		courseStudentDto.setCourseStudentCourseId(courseStudent.getCourse().getCourseId());
-		courseStudentDto.setCourseStudentCourseSubjectName(courseStudent.getCourse().getSubject().getSubjectName());
-		courseStudentDto.setCourseStudentCourseTeacherName(courseStudent.getCourse().getTeacher().getTeacherName());
-		courseStudentDto.setCourseStudentStudentId(courseStudent.getCourseStudentId());
-		courseStudentDto.setCourseStudentStudentName(courseStudent.getStudent().getStudentName());
+		CourseStudentDto courseStudentDto = this.modelMapperService.forDto().map(courseStudent, CourseStudentDto.class);
 		return ResponseEntity.status(HttpStatus.FOUND).body(courseStudentDto);
 
 	}
@@ -122,22 +111,14 @@ public class CourseStudentManager implements CourseStudentService {
 			throw new BusinessException("There is no course with this id : " + courseId);
 		}
 
-		List<CourseStudent> courseStudents = iCourseStudentRepository.findAll().stream().filter(c->c.getCourse().getCourseId()==courseId).toList();
+		List<CourseStudent> courseStudents = iCourseStudentRepository.findAll().stream()
+				.filter(c -> c.getCourse().getCourseId() == courseId).collect(Collectors.toList());
 		if (courseStudents.isEmpty()) {
 			throw new BusinessException("There is no courseStudents with this course id : " + courseId);
 		}
-		List<ListCourseStudentDto> listCourseStudentDtos = new ArrayList<>();
-		for (CourseStudent courseStudent : courseStudents) {
-			ListCourseStudentDto listCourseStudentDto = new ListCourseStudentDto();
-			listCourseStudentDto.setCourseStudentId(courseStudent.getCourseStudentId());
-			listCourseStudentDto.setCourseStudentAbsence(courseStudent.getCourseStudentAbsence());
-			listCourseStudentDto.setCourseStudentNote(courseStudent.getCourseStudentNote());
-			listCourseStudentDto
-					.setCourseStudentCourseSubjectName(courseStudent.getCourse().getSubject().getSubjectName());
-			listCourseStudentDto
-					.setCourseStudentCourseTeacherName(courseStudent.getCourse().getTeacher().getTeacherName());
-			listCourseStudentDto.setCourseStudentStudentName(courseStudent.getStudent().getStudentName());
-		}
+		List<ListCourseStudentDto> listCourseStudentDtos = courseStudents.stream()
+				.map(courseStudent -> this.modelMapperService.forDto().map(courseStudent, ListCourseStudentDto.class))
+				.collect(Collectors.toList());
 		return ResponseEntity.status(HttpStatus.FOUND).body(listCourseStudentDtos);
 	}
 
@@ -146,23 +127,15 @@ public class CourseStudentManager implements CourseStudentService {
 		if (!isExistedStudent(studentId)) {
 			throw new BusinessException("There is no student with this id : " + studentId);
 		}
-		List<CourseStudent> courseStudents = iCourseStudentRepository.findAll().stream().filter(c->c.getStudent().getStudentId()==studentId).toList();
-		
+		List<CourseStudent> courseStudents = iCourseStudentRepository.findAll().stream()
+				.filter(c -> c.getStudent().getStudentId() == studentId).collect(Collectors.toList());
+
 		if (courseStudents.isEmpty()) {
 			throw new BusinessException("There is no courseStudent with this student id : " + studentId);
 		}
-		List<ListCourseStudentDto> listCourseStudentDtos = new ArrayList<>();
-		for (CourseStudent courseStudent : courseStudents) {
-			ListCourseStudentDto listCourseStudentDto = new ListCourseStudentDto();
-			listCourseStudentDto.setCourseStudentId(courseStudent.getCourseStudentId());
-			listCourseStudentDto.setCourseStudentAbsence(courseStudent.getCourseStudentAbsence());
-			listCourseStudentDto.setCourseStudentNote(courseStudent.getCourseStudentNote());
-			listCourseStudentDto
-					.setCourseStudentCourseSubjectName(courseStudent.getCourse().getSubject().getSubjectName());
-			listCourseStudentDto
-					.setCourseStudentCourseTeacherName(courseStudent.getCourse().getTeacher().getTeacherName());
-			listCourseStudentDto.setCourseStudentStudentName(courseStudent.getStudent().getStudentName());
-		}
+		List<ListCourseStudentDto> listCourseStudentDtos = courseStudents.stream()
+				.map(courseStudent -> this.modelMapperService.forDto().map(courseStudent, ListCourseStudentDto.class))
+				.collect(Collectors.toList());
 		return ResponseEntity.status(HttpStatus.FOUND).body(listCourseStudentDtos);
 	}
 
@@ -181,10 +154,9 @@ public class CourseStudentManager implements CourseStudentService {
 		return courseService.getById(courseStudentCourseId) != null;
 	}
 
-
 	private boolean isExistedCourseStudent(CourseStudent courseStudent) {
 
-		return iCourseStudentRepository.existsByCourseAndStudent( courseStudent.getCourse(),courseStudent.getStudent());
+		return iCourseStudentRepository.existsByCourseAndStudent(courseStudent.getCourse(), courseStudent.getStudent());
 	}
 
 }

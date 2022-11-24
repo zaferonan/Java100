@@ -2,6 +2,7 @@ package com.turkcell.OBS.service.concretes;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
@@ -10,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.turkcell.OBS.core.exceptions.BusinessException;
+import com.turkcell.OBS.core.exceptions.mappers.abstracts.ModelMapperService;
 import com.turkcell.OBS.model.Course;
 import com.turkcell.OBS.repository.abstracts.ICourseRepository;
 import com.turkcell.OBS.service.abstracts.CourseService;
@@ -29,21 +31,16 @@ public class CourseManager implements CourseService {
 	private TeacherService teacherService;
 	@Autowired
 	private SubjectService subjectService;
+	@Autowired
+	private ModelMapperService modelMapperService;
 
 	@Override
 	public ResponseEntity<List<ListCourseDto>> getAll() {
 		List<Course> courses = iCourseRepository.findAll();
-		List<ListCourseDto> listCourseDtos = new ArrayList<ListCourseDto>();
-		for (Course course : courses) {
-			ListCourseDto listCourseDto = new ListCourseDto();
-			listCourseDto.setCourseId(course.getCourseId());
-			listCourseDto.setCourseTeacherName(
-					teacherService.getById(course.getTeacher().getTeacherId()).getBody().getTeacherName());
-			listCourseDto.setCourseSubjectName(
-					subjectService.getById(course.getSubject().getSubjectId()).getBody().getSubjectName());
-			listCourseDtos.add(listCourseDto);
-		}
-		return ResponseEntity.status(HttpStatus.FOUND).body(listCourseDtos);
+		List<ListCourseDto> listCourseDtos = courses.stream()
+				.map(course -> this.modelMapperService.forDto().map(course, ListCourseDto.class))
+				.collect(Collectors.toList());
+		return ResponseEntity.status(HttpStatus.OK).body(listCourseDtos);
 	}
 
 	@Override
@@ -59,9 +56,7 @@ public class CourseManager implements CourseService {
 						teacherService.getByIdAsTeacher(createCourseRequest.getTeacherId())))) {
 			throw new BusinessException("This Course is already exists!!");
 		}
-		iCourseRepository
-				.save(createCourseRequest.toCourse(subjectService.getByIdAsSubject(createCourseRequest.getSubjectId()),
-						teacherService.getByIdAsTeacher(createCourseRequest.getTeacherId())));
+		iCourseRepository.save(this.modelMapperService.forRequest().map(createCourseRequest, Course.class));
 		return ResponseEntity.status(HttpStatus.CREATED).body("Course is saved in the database.");
 
 	}
@@ -79,9 +74,7 @@ public class CourseManager implements CourseService {
 					"There is no subject whit this id : " + updateCourseRequest.getSubjectId() + " in the database!");
 		}
 
-		iCourseRepository
-				.save(updateCourseRequest.toCourse(subjectService.getByIdAsSubject(updateCourseRequest.getSubjectId()),
-						teacherService.getByIdAsTeacher(updateCourseRequest.getTeacherId())));
+		iCourseRepository.save(this.modelMapperService.forRequest().map(updateCourseRequest, Course.class));
 		return ResponseEntity.status(HttpStatus.OK).body("Course is updated in the database.");
 
 	}
@@ -104,15 +97,9 @@ public class CourseManager implements CourseService {
 
 		Course course = iCourseRepository.getById(courseId);
 
-		CourseDto courseDto = new CourseDto();
-		courseDto.setCourseSubjectId(course.getSubject().getSubjectId());
-		courseDto.setCourseSubjectName(
-				subjectService.getById(course.getSubject().getSubjectId()).getBody().getSubjectName());
-		courseDto.setCourseTeacherId(course.getTeacher().getTeacherId());
-		courseDto.setCourseTeacherName(
-				teacherService.getById(course.getTeacher().getTeacherId()).getBody().getTeacherName());
+		CourseDto courseDto = this.modelMapperService.forDto().map(course, CourseDto.class);
 
-		return ResponseEntity.status(HttpStatus.FOUND).body(courseDto);
+		return ResponseEntity.status(HttpStatus.OK).body(courseDto);
 	}
 
 	@Override
@@ -122,22 +109,16 @@ public class CourseManager implements CourseService {
 			throw new BusinessException("There is no teacher whit this id : " + teacherId + " in the database!");
 		}
 
-		List<Course> courses = iCourseRepository.findAll().stream().filter(c->c.getTeacher().getTeacherId()==teacherId).toList();
+		List<Course> courses = iCourseRepository.findAll().stream()
+				.filter(c -> c.getTeacher().getTeacherId() == teacherId).collect(Collectors.toList());
 
 		if (courses.isEmpty()) {
 			throw new BusinessException("There is no course with this teacher id : " + teacherId);
 		}
 
-		List<ListCourseDto> listCourseDtos = new ArrayList<ListCourseDto>();
-		for (Course course : courses) {
-			ListCourseDto listCourseDto = new ListCourseDto();
-			listCourseDto.setCourseId(course.getCourseId());
-			listCourseDto.setCourseTeacherName(
-					teacherService.getById(course.getTeacher().getTeacherId()).getBody().getTeacherName());
-			listCourseDto.setCourseSubjectName(
-					subjectService.getById(course.getSubject().getSubjectId()).getBody().getSubjectName());
-			listCourseDtos.add(listCourseDto);
-		}
+		List<ListCourseDto> listCourseDtos = courses.stream()
+				.map(course -> this.modelMapperService.forDto().map(course, ListCourseDto.class))
+				.collect(Collectors.toList());
 		return ResponseEntity.status(HttpStatus.FOUND).body(listCourseDtos);
 	}
 
@@ -148,20 +129,14 @@ public class CourseManager implements CourseService {
 			throw new BusinessException("There is no subject whit this id : " + subjectId + " in the database!");
 		}
 
-		List<Course> courses = iCourseRepository.findAll().stream().filter(c->c.getSubject().getSubjectId()==subjectId).toList();
+		List<Course> courses = iCourseRepository.findAll().stream()
+				.filter(c -> c.getSubject().getSubjectId() == subjectId).collect(Collectors.toList());
 		if (courses.isEmpty()) {
 			throw new BusinessException("There is no course with this subject id : " + subjectId);
 		}
-		List<ListCourseDto> listCourseDtos = new ArrayList<ListCourseDto>();
-		for (Course course : courses) {
-			ListCourseDto listCourseDto = new ListCourseDto();
-			listCourseDto.setCourseId(course.getCourseId());
-			listCourseDto.setCourseTeacherName(
-					teacherService.getById(course.getTeacher().getTeacherId()).getBody().getTeacherName());
-			listCourseDto.setCourseSubjectName(
-					subjectService.getById(course.getSubject().getSubjectId()).getBody().getSubjectName());
-			listCourseDtos.add(listCourseDto);
-		}
+		List<ListCourseDto> listCourseDtos = courses.stream()
+				.map(course -> this.modelMapperService.forDto().map(course, ListCourseDto.class))
+				.collect(Collectors.toList());
 		return ResponseEntity.status(HttpStatus.FOUND).body(listCourseDtos);
 	}
 
@@ -189,10 +164,9 @@ public class CourseManager implements CourseService {
 		return iCourseRepository.getById(courseId) != null;
 	}
 
-
 	private boolean isExistedCourse(Course course) {
 
-		return iCourseRepository.existsBySubjectAndTeacher(course.getSubject(),course.getTeacher());
+		return iCourseRepository.existsBySubjectAndTeacher(course.getSubject(), course.getTeacher());
 	}
 
 }

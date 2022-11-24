@@ -16,6 +16,7 @@ public class ListTeacherDto {
 	private long teacherId;
 	private boolean isGicik;
 	private String teacherName;
+	private List<ListCourseDto> courses;
 	
 	
 }

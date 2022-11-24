@@ -4,8 +4,10 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.jdbc.BadSqlGrammarException;
@@ -23,6 +25,11 @@ public class ObsApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(ObsApplication.class, args);
+	}
+	
+	@Bean
+	public ModelMapper getModelMapper() {
+		return new ModelMapper();
 	}
 
 	@ExceptionHandler

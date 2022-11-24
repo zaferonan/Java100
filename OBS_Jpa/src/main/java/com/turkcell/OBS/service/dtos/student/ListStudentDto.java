@@ -19,5 +19,6 @@ public class ListStudentDto {
 	private String studentName;
 	private long studentNumber;
 	private int studentYear;
+	private List<ListCourseStudentDto> courseStudents;
 	
 }

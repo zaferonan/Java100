@@ -1,9 +1,5 @@
 package com.turkcell.OBS.service.dtos.courseStudent;
 
-import java.util.List;
-
-import com.turkcell.OBS.model.CourseStudent;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

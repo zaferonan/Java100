@@ -15,6 +15,7 @@ public class ListSubjectDto {
 
 	private long subjectId;
 	private String subjectName;
+	private List<ListCourseDto> courses;
 	
 	
 }

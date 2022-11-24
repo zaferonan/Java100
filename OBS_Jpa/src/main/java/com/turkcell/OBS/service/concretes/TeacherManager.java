@@ -2,6 +2,7 @@ package com.turkcell.OBS.service.concretes;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -9,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.turkcell.OBS.core.exceptions.BusinessException;
+import com.turkcell.OBS.core.exceptions.mappers.abstracts.ModelMapperService;
 import com.turkcell.OBS.model.Teacher;
 import com.turkcell.OBS.repository.abstracts.ITeacherRepository;
 import com.turkcell.OBS.service.abstracts.TeacherService;
@@ -23,21 +25,17 @@ public class TeacherManager implements TeacherService {
 
 	@Autowired
 	private ITeacherRepository iTeacherRepository;
+	@Autowired
+	private ModelMapperService modelMapperService;
 
 	@Override
 	public ResponseEntity<List<ListTeacherDto>> getAll() {
 		List<Teacher> teachers = iTeacherRepository.findAll();
-		List<ListTeacherDto> listTeacherDtos = new ArrayList<>();
-		for (Teacher teacher : teachers) {
-			ListTeacherDto listTeacherDto = new ListTeacherDto();
-			listTeacherDto.setTeacherId(teacher.getTeacherId());
-			listTeacherDto.setGicik(teacher.isGicik());
-			listTeacherDto.setTeacherName(teacher.getTeacherName());
-
-					
-
-			listTeacherDtos.add(listTeacherDto);
-		}
+		
+		List<ListTeacherDto> listTeacherDtos = teachers.stream()
+				.map(teacher -> this.modelMapperService.forDto().map(teacher, ListTeacherDto.class))
+				.collect(Collectors.toList());
+		
 		return ResponseEntity.status(HttpStatus.OK).body(listTeacherDtos);
 	}
 
@@ -76,19 +74,8 @@ public class TeacherManager implements TeacherService {
 			throw new BusinessException("There is no teacher with this id : " + teacherId);
 		}
 		Teacher teacher = iTeacherRepository.getById(teacherId);
-		TeacherDto teacherDto = new TeacherDto();
-		teacherDto.setGicik(teacher.isGicik());
-		teacherDto.setTeacherName(teacher.getTeacherName());
+		TeacherDto teacherDto = this.modelMapperService.forDto().map(teacher, TeacherDto.class);
 		
-		List<ListCourseDto> listCourseDtos = new ArrayList<ListCourseDto>();
-
-		for (int i = 0; i < teacher.getCourses().size(); i++) {
-			ListCourseDto listCourseDto = new ListCourseDto(teacher.getCourses().get(i).getCourseId(),
-					teacher.getCourses().get(i).getSubject().getSubjectName(),
-					teacher.getCourses().get(i).getTeacher().getTeacherName());
-			listCourseDtos.add(listCourseDto);
-		}
-		teacherDto.setCourses(listCourseDtos);
 		
 		return ResponseEntity.ok(teacherDto);
 
@@ -100,10 +87,8 @@ public class TeacherManager implements TeacherService {
 			throw new BusinessException("There is no teacher with this name : " + teacherName);
 		}
 		Teacher teacher = iTeacherRepository.getByTeacherName(teacherName);
-		ListTeacherDto teacherDto = new ListTeacherDto();
-		teacherDto.setTeacherId(teacher.getTeacherId());
-		teacherDto.setGicik(teacher.isGicik());
-		teacherDto.setTeacherName(teacher.getTeacherName());		
+		
+		ListTeacherDto teacherDto = this.modelMapperService.forDto().map(teacher, ListTeacherDto.class);		
 		
 		return ResponseEntity.ok(teacherDto);
 	}

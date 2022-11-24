@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.turkcell.OBS.model.Course;
 import com.turkcell.OBS.service.abstracts.CourseService;
 import com.turkcell.OBS.service.dtos.course.CourseDto;
 import com.turkcell.OBS.service.dtos.course.ListCourseDto;

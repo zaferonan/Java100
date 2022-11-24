@@ -1,7 +1,7 @@
 package com.turkcell.OBS.service.concretes;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.turkcell.OBS.core.exceptions.BusinessException;
+import com.turkcell.OBS.core.exceptions.mappers.abstracts.ModelMapperService;
 import com.turkcell.OBS.model.Student;
 import com.turkcell.OBS.repository.abstracts.IStudentRepository;
 import com.turkcell.OBS.service.abstracts.StudentService;
@@ -22,19 +23,17 @@ public class StudentManager implements StudentService {
 
 	@Autowired
 	private IStudentRepository iStudentRepository;
+	@Autowired
+	private ModelMapperService modelMapperService;
 
 	@Override
 	public ResponseEntity<List<ListStudentDto>> getAll() {
 		List<Student> students = iStudentRepository.findAll();
-		List<ListStudentDto> listStudentDtos = new ArrayList<ListStudentDto>();
-		for (Student student : students) {
-			ListStudentDto listStudentDto = new ListStudentDto();
-			listStudentDto.setStudentId(student.getStudentId());
-			listStudentDto.setStudentName(student.getStudentName());
-			listStudentDto.setStudentNumber(student.getStudentNumber());
-			listStudentDto.setStudentYear(student.getStudentYear());
-			listStudentDtos.add(listStudentDto);
-		}
+		
+		List<ListStudentDto> listStudentDtos = students.stream()
+				.map(student -> this.modelMapperService.forDto().map(student, ListStudentDto.class))
+				.collect(Collectors.toList());
+		
 		return ResponseEntity.status(HttpStatus.OK).body(listStudentDtos);
 	}
 
@@ -75,12 +74,9 @@ public class StudentManager implements StudentService {
 		}
 		Student student = iStudentRepository.getById(studentId);
 
-		StudentDto studentDto = new StudentDto();
-		studentDto.setStudentName(student.getStudentName());
-		studentDto.setStudentNumber(student.getStudentNumber());
-		studentDto.setStudentYear(student.getStudentYear());
+		StudentDto studentDto = this.modelMapperService.forDto().map(student, StudentDto.class);
 
-		return ResponseEntity.ok(studentDto);
+		return ResponseEntity.status(HttpStatus.OK).body(studentDto);
 	}
 
 	@Override
@@ -92,11 +88,7 @@ public class StudentManager implements StudentService {
 
 		Student student = iStudentRepository.getByStudentNumber(studentNumber);
 
-		ListStudentDto studentDto = new ListStudentDto();
-		studentDto.setStudentId(student.getStudentId());
-		studentDto.setStudentName(student.getStudentName());
-		studentDto.setStudentNumber(student.getStudentNumber());
-		studentDto.setStudentYear(student.getStudentYear());
+		ListStudentDto studentDto = this.modelMapperService.forDto().map(student, ListStudentDto.class);
 
 		return ResponseEntity.status(HttpStatus.OK).body(studentDto);
 	}
@@ -106,17 +98,13 @@ public class StudentManager implements StudentService {
 		if (!isExistByName(studentName)) {
 			throw new BusinessException("There is no student with this name : " + studentName + "!");
 		}
-		Student student = iStudentRepository.getByStudentName(studentName);
+		Student student = iStudentRepository.getByStudentNameIgnoreCase(studentName);
 
-		ListStudentDto studentDto = new ListStudentDto();
-		studentDto.setStudentId(student.getStudentId());
-		studentDto.setStudentName(student.getStudentName());
-		studentDto.setStudentNumber(student.getStudentNumber());
-		studentDto.setStudentYear(student.getStudentYear());
+		ListStudentDto listStudentDto = this.modelMapperService.forDto().map(student, ListStudentDto.class);
 
-		return ResponseEntity.status(HttpStatus.OK).body(studentDto);
+		return ResponseEntity.status(HttpStatus.OK).body(listStudentDto);
 	}
-	
+
 	@Override
 	public Student getByIdAsStudent(long studentId) {
 		if (!isExistById(studentId)) {
@@ -127,17 +115,17 @@ public class StudentManager implements StudentService {
 
 	private boolean isExistById(long studentId) {
 
-		return iStudentRepository.getById(studentId) != null;
+		return iStudentRepository.existsById(studentId);
 	}
 
 	private boolean isExistByName(String studentName) {
 
-		return iStudentRepository.getByStudentName(studentName) != null;
+		return iStudentRepository.existsByStudentNameIgnoreCase(studentName);
 	}
 
 	private boolean isExistByStudentNumber(long studentNumber) {
 
-		return iStudentRepository.getByStudentNumber(studentNumber) != null;
+		return iStudentRepository.existsByStudentNumber(studentNumber);
 	}
 
 }

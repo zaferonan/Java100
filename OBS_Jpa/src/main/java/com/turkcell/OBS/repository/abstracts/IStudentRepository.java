@@ -7,7 +7,9 @@ import com.turkcell.OBS.model.Student;
 public interface IStudentRepository extends JpaRepository<Student, Long> {
 
 	public Student getById(long studentId);
-	public Student getByStudentName(String studentName);
 	public Student getByStudentNumber(long studentNumber);
+	public boolean existsByStudentNumber(long studentNumber);
+	public boolean existsByStudentNameIgnoreCase(String studentName);
+	public Student getByStudentNameIgnoreCase(String studentName);
 	
 }

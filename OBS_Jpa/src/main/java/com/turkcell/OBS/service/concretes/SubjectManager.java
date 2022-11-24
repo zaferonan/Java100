@@ -2,6 +2,7 @@ package com.turkcell.OBS.service.concretes;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -9,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.turkcell.OBS.core.exceptions.BusinessException;
+import com.turkcell.OBS.core.exceptions.mappers.abstracts.ModelMapperService;
 import com.turkcell.OBS.model.Subject;
 import com.turkcell.OBS.repository.abstracts.ISubjectRepository;
 import com.turkcell.OBS.service.abstracts.SubjectService;
@@ -23,18 +25,18 @@ public class SubjectManager implements SubjectService {
 
 	@Autowired
 	private ISubjectRepository iSubjectRepository;
+	@Autowired
+	private ModelMapperService modelMapperService;
 
 	@Override
 	public ResponseEntity<List<ListSubjectDto>> getAll() {
 
 		List<Subject> subjects = iSubjectRepository.findAll();
-		List<ListSubjectDto> listSubjectDtos = new ArrayList<ListSubjectDto>();
-		for (Subject subject : subjects) {
+		List<ListSubjectDto> listSubjectDtos = subjects.stream()
+				.map(subject -> this.modelMapperService.forDto().map(subject, ListSubjectDto.class))
+				.collect(Collectors.toList());
 
-			listSubjectDtos.add(subjectToListSubjectDto(subject));
-		}
-
-		return ResponseEntity.status(HttpStatus.FOUND).body(listSubjectDtos);
+		return ResponseEntity.status(HttpStatus.OK).body(listSubjectDtos);
 	}
 
 	@Override
@@ -75,7 +77,9 @@ public class SubjectManager implements SubjectService {
 		}
 		Subject subject = iSubjectRepository.getById(subjectId);
 
-		return ResponseEntity.status(HttpStatus.FOUND).body(subjectToSubjectDto(subject));
+		SubjectDto subjectDto = this.modelMapperService.forDto().map(subject, SubjectDto.class);
+
+		return ResponseEntity.status(HttpStatus.OK).body(subjectDto);
 	}
 
 	@Override
@@ -85,7 +89,9 @@ public class SubjectManager implements SubjectService {
 		}
 		Subject subject = iSubjectRepository.getBySubjectName(subjectName);
 
-		return ResponseEntity.status(HttpStatus.FOUND).body(subjectToListSubjectDto(subject));
+		ListSubjectDto listSubjectDto = this.modelMapperService.forDto().map(subject, ListSubjectDto.class);
+
+		return ResponseEntity.status(HttpStatus.OK).body(listSubjectDto);
 	}
 
 	private boolean isExistByName(String subjectName) {
@@ -96,37 +102,6 @@ public class SubjectManager implements SubjectService {
 	private boolean isExistById(long subjectId) {
 
 		return iSubjectRepository.getById(subjectId) != null;
-	}
-
-	private SubjectDto subjectToSubjectDto(Subject subject) {
-		SubjectDto subjectDto = new SubjectDto();
-
-		subjectDto.setSubjectName(subject.getSubjectName());
-
-		List<ListCourseDto> listCourseDtos = new ArrayList<ListCourseDto>();
-		for (int i = 0; i < subject.getCourses().size(); i++) {
-			ListCourseDto listCourseDto = new ListCourseDto(subject.getCourses().get(i).getCourseId(),
-					subject.getCourses().get(i).getSubject().getSubjectName(),
-					subject.getCourses().get(i).getTeacher().getTeacherName());
-			listCourseDtos.add(listCourseDto);
-		}
-		subjectDto.setCourses(listCourseDtos);
-		return subjectDto;
-	}
-
-	private ListSubjectDto subjectToListSubjectDto(Subject subject) {
-		ListSubjectDto listSubjectDto = new ListSubjectDto();
-		listSubjectDto.setSubjectId(subject.getSubjectId());
-		listSubjectDto.setSubjectName(subject.getSubjectName());
-
-		List<ListCourseDto> listCourseDtos = new ArrayList<ListCourseDto>();
-		for (int i = 0; i < subject.getCourses().size(); i++) {
-			ListCourseDto listCourseDto = new ListCourseDto(subject.getCourses().get(i).getCourseId(),
-					subject.getCourses().get(i).getSubject().getSubjectName(),
-					subject.getCourses().get(i).getTeacher().getTeacherName());
-			listCourseDtos.add(listCourseDto);
-		}		
-		return listSubjectDto;
 	}
 
 	@Override
