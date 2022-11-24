@@ -2,8 +2,6 @@ package com.turkcell.OBS.service.requests.update;
 
 import javax.validation.constraints.NotNull;
 
-import com.turkcell.OBS.model.Teacher;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -21,12 +19,4 @@ public class UpdateTeacherRequest {
 
 	@NotNull
 	private boolean isGicik;
-
-	public Teacher toTeacher() {
-		Teacher teacher = new Teacher();
-		teacher.setTeacherId(teacherId);
-		teacher.setTeacherName(this.teacherName);
-		teacher.setGicik(this.isGicik);
-		return teacher;
-	}
 }

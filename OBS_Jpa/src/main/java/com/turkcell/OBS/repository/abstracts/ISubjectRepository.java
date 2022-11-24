@@ -8,7 +8,8 @@ import com.turkcell.OBS.model.Subject;
 public interface ISubjectRepository extends JpaRepository<Subject, Long>{
 	
 	public Subject getById(long subjectId);
-	public Subject getBySubjectName(String subjectName);
+	public Subject getBySubjectNameIgnoreCase(String subjectName);
+	public boolean existsBySubjectNameIgnoreCase(String subjectName);
 	
 	
 }

@@ -1,6 +1,5 @@
 package com.turkcell.OBS.service.concretes;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -10,7 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.turkcell.OBS.core.exceptions.BusinessException;
-import com.turkcell.OBS.core.exceptions.mappers.abstracts.ModelMapperService;
+import com.turkcell.OBS.core.mappers.abstracts.ModelMapperService;
 import com.turkcell.OBS.model.CourseStudent;
 import com.turkcell.OBS.repository.abstracts.ICourseStudentRepository;
 import com.turkcell.OBS.service.abstracts.CourseService;
@@ -20,8 +19,6 @@ import com.turkcell.OBS.service.dtos.courseStudent.CourseStudentDto;
 import com.turkcell.OBS.service.dtos.courseStudent.ListCourseStudentDto;
 import com.turkcell.OBS.service.requests.create.CreateCourseStudentRequest;
 import com.turkcell.OBS.service.requests.update.UpdateCourseStudentRequest;
-
-import net.bytebuddy.asm.Advice.This;
 
 @Service
 public class CourseStudentManager implements CourseStudentService {
@@ -54,9 +51,7 @@ public class CourseStudentManager implements CourseStudentService {
 		} else if (!isExistedStudent(createCourseStudentRequest.getStudentId())) {
 			throw new BusinessException("There is no student whit this id : "
 					+ createCourseStudentRequest.getStudentId() + " in the database!");
-		} else if (isExistedCourseStudent(createCourseStudentRequest.toCourseStudent(
-				courseService.getByIdAsCourse(createCourseStudentRequest.getCourseId()),
-				studentService.getByIdAsStudent(createCourseStudentRequest.getStudentId())))) {
+		} else if (isExistedCourseStudent(this.modelMapperService.forRequest().map(createCourseStudentRequest, CourseStudent.class))) {
 			throw new BusinessException("This CourseStudent is already exists!!");
 		}
 

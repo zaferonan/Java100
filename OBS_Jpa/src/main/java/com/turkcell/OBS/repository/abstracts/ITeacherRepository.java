@@ -7,5 +7,7 @@ import com.turkcell.OBS.model.Teacher;
 public interface ITeacherRepository extends JpaRepository<Teacher, Long> {
 	
 	public Teacher getById(long teacherId);
-	public Teacher getByTeacherName(String teacherName);
+	public Teacher getByTeacherNameIgnoreCase(String teacherName);
+	public boolean existsByTeacherNameIgnoreCase(String teacherName);
+	
 }

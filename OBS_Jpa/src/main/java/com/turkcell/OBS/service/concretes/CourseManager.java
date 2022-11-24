@@ -1,17 +1,15 @@
 package com.turkcell.OBS.service.concretes;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Example;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.turkcell.OBS.core.exceptions.BusinessException;
-import com.turkcell.OBS.core.exceptions.mappers.abstracts.ModelMapperService;
+import com.turkcell.OBS.core.mappers.abstracts.ModelMapperService;
 import com.turkcell.OBS.model.Course;
 import com.turkcell.OBS.repository.abstracts.ICourseRepository;
 import com.turkcell.OBS.service.abstracts.CourseService;
@@ -52,8 +50,7 @@ public class CourseManager implements CourseService {
 			throw new BusinessException(
 					"There is no subject whit this id : " + createCourseRequest.getSubjectId() + " in the database!");
 		} else if (isExistedCourse(
-				createCourseRequest.toCourse(subjectService.getByIdAsSubject(createCourseRequest.getSubjectId()),
-						teacherService.getByIdAsTeacher(createCourseRequest.getTeacherId())))) {
+				this.modelMapperService.forRequest().map(createCourseRequest, Course.class))) {
 			throw new BusinessException("This Course is already exists!!");
 		}
 		iCourseRepository.save(this.modelMapperService.forRequest().map(createCourseRequest, Course.class));

@@ -9,7 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.turkcell.OBS.core.exceptions.BusinessException;
-import com.turkcell.OBS.core.exceptions.mappers.abstracts.ModelMapperService;
+import com.turkcell.OBS.core.mappers.abstracts.ModelMapperService;
 import com.turkcell.OBS.model.Student;
 import com.turkcell.OBS.repository.abstracts.IStudentRepository;
 import com.turkcell.OBS.service.abstracts.StudentService;
@@ -42,7 +42,7 @@ public class StudentManager implements StudentService {
 		if (isExistByStudentNumber(createStudentRequest.getStudentNumber())) {
 			throw new BusinessException("There is a student with same student number!");
 		}
-		iStudentRepository.save(createStudentRequest.toStudent());
+		iStudentRepository.save(this.modelMapperService.forRequest().map(createStudentRequest, Student.class));
 		return ResponseEntity.status(HttpStatus.CREATED).body("Student is saved.");
 
 	}
@@ -52,7 +52,7 @@ public class StudentManager implements StudentService {
 		if (!isExistById(updateStudentRequest.getStudentId())) {
 			throw new BusinessException("There is no student with this id : " + updateStudentRequest.getStudentId());
 		}
-		iStudentRepository.save(updateStudentRequest.toStudent());
+		iStudentRepository.save(this.modelMapperService.forRequest().map(updateStudentRequest, Student.class));
 		return ResponseEntity.ok("Student " + updateStudentRequest.getStudentName() + " is updated in the database.");
 
 	}
