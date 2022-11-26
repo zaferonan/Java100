@@ -1,5 +1,6 @@
 package com.turkcell.OBS.service.requests.create;
 
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import lombok.AllArgsConstructor;
@@ -11,7 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class CreateStudentRequest {
 
-	@NotNull
+	@NotBlank
 	private String studentName;
 	@NotNull
 	private long studentNumber;

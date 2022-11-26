@@ -2,6 +2,8 @@ package com.turkcell.OBS.controller;
 
 import java.util.List;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -47,7 +49,7 @@ public class CourseStudentController {
 	}
 
 	@PostMapping("/add")
-	public ResponseEntity<String> add(@RequestBody CreateCourseStudentRequest createCourseStudentRequest) {
+	public ResponseEntity<String> add(@Valid @RequestBody CreateCourseStudentRequest createCourseStudentRequest) {
 		return courseStudentService.add(createCourseStudentRequest);
 	}
 
@@ -57,7 +59,7 @@ public class CourseStudentController {
 	}
 
 	@PutMapping("/update")
-	public ResponseEntity<String> update(@RequestBody UpdateCourseStudentRequest updateCourseStudentRequest) {
+	public ResponseEntity<String> update(@Valid @RequestBody UpdateCourseStudentRequest updateCourseStudentRequest) {
 		return courseStudentService.update(updateCourseStudentRequest);
 
 	}
